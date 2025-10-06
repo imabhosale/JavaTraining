@@ -1,0 +1,13 @@
+gralVm / HotSpot  ---- virtual machine like JVM having speed of execution is very low
+it support on Kubernetes execution and deployment
+
+
+
+mvn clean compile
+
+mvn exec:java -Dexec.mainClass=org.demo.de.JWTTokenGeneration \
+    -Dexec.classpathScope=compile \
+    -Dsmallrye.jwt.sign.key.location=privateSigningKey.pem
+
+
+
