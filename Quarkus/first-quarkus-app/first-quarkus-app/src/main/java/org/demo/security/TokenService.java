@@ -16,7 +16,7 @@ public class TokenService {
     public final static Logger LOGGER = Logger.getLogger(TokenService.class.getSimpleName());
 
     public String generateUserToken(String email, String username) {
-        return generateToken(email, username);
+        return generateToken(email, username, Roles.USER);
     }
 
     public String generateServiceToken(String serviceId, String serviceName) {

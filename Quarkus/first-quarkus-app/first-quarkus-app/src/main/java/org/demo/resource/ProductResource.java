@@ -40,7 +40,7 @@ public class ProductResource {
     }
 
     @POST
-    @RolesAllowed({"Admin", ""})
+    @RolesAllowed({"Admin","User"})
     public Response createProduct(Product product) {
         Product created = productService.createProduct(product);
         return Response.status(Response.Status.CREATED).entity(created).build();
