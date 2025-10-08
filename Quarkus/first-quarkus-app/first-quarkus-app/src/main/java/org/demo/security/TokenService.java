@@ -2,6 +2,7 @@ package org.demo.security;
 
 
 import jakarta.enterprise.context.RequestScoped;
+import org.demo.model.User;
 import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.logmanager.Logger;
 import org.jose4j.jwt.JwtClaims;
@@ -15,7 +16,7 @@ public class TokenService {
     public final static Logger LOGGER = Logger.getLogger(TokenService.class.getSimpleName());
 
     public String generateUserToken(String email, String username) {
-        return generateToken(email, username, Roles.USER);
+        return generateToken(email, username);
     }
 
     public String generateServiceToken(String serviceId, String serviceName) {

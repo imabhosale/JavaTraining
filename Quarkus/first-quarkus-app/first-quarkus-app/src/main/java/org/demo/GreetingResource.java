@@ -15,6 +15,8 @@ import org.demo.security.Roles;
 @Path("/hello")
 public class GreetingResource {
 
+
+
     @Context
     SecurityContext securityContext;
 
@@ -28,7 +30,7 @@ public class GreetingResource {
 
     @GET
     @Path("/me")
-    @RolesAllowed({Roles.USER, Roles.SERVICE})
+    @RolesAllowed({Roles.USER, Roles.ADMIN})
 //    @PermitAll
     public User me() {
         return User.find("email", securityContext.getUserPrincipal().getName()).firstResult();

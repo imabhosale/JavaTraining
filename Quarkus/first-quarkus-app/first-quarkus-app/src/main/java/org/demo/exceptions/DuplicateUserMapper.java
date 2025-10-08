@@ -14,7 +14,7 @@ public class DuplicateUserMapper implements ExceptionMapper<DuplicateUserExcepti
     @Override
     public Response toResponse(DuplicateUserException exception) {
         LOG.info("Duplicate register: {}", exception.getMessage());
-        ErrorResponse error = new ErrorResponse("User already exists—try a different login!", 409);
+        ErrorResponse error = new ErrorResponse("User already exists ", 409);
         return Response.status(error.status).entity(error).type(MediaType.APPLICATION_JSON).build();
     }
 }

@@ -1,13 +1,26 @@
 package org.demo.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.security.jpa.Password;
+import io.quarkus.security.jpa.Roles;
+import io.quarkus.security.jpa.UserDefinition;
+import io.quarkus.security.jpa.Username;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
+
+@UserDefinition
 public class User extends PanacheEntity {
-    public String login;
+
+    @Username
+    public String username;
     public String email;
+
+    @Password
     public String password;
+
+    @Roles
+    public String role;
 }

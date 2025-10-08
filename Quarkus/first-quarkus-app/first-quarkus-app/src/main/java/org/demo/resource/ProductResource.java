@@ -1,5 +1,6 @@
 package org.demo.resource;
 
+import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -24,14 +25,14 @@ public class ProductResource {
     ProductService productService;
 
     @GET
-    @RolesAllowed({"Admin", ""})
+    @RolesAllowed({"Admin", "User"})
     public List<Product> getAllProducts() {
         return productService.getAllProducts();
     }
 
     @GET
     @Path("/{id}")
-    @RolesAllowed({"Admin", "User"})
+    @Authenticated
     public Response getProductById(@PathParam("id") Long id) {
         Product product = productService.getProductById(id);
         if (product == null) return Response.status(Response.Status.NOT_FOUND).build();
@@ -39,7 +40,7 @@ public class ProductResource {
     }
 
     @POST
-    @RolesAllowed({"Admin", "User"})
+    @RolesAllowed({"Admin", ""})
     public Response createProduct(Product product) {
         Product created = productService.createProduct(product);
         return Response.status(Response.Status.CREATED).entity(created).build();
