@@ -1,7 +1,7 @@
 package org.demo.security;
 
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.transaction.Transactional; // ADD THIS IMPORT
+import jakarta.transaction.Transactional;
 import org.demo.model.RefreshToken;
 import org.demo.model.User;
 import org.eclipse.microprofile.jwt.Claims;
@@ -9,6 +9,7 @@ import org.jose4j.jwt.JwtClaims;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -20,39 +21,36 @@ public class TokenService {
         public static final String USER = "User";
     }
 
-    // UPDATED: Add @Transactional for DB ops
     @Transactional
     public TokenPair generateUserToken(String email, String username, Long userId) {
         String accessToken = generateToken(email, username, Roles.USER);
-        RefreshToken refresh = RefreshToken.createForUser(userId); // persist() happens here
+        RefreshToken refresh = createForUser(userId); // Use new method
         LOG.info("Tokens generated for user: {}", username);
         return new TokenPair(accessToken, refresh.token);
     }
 
-    // UPDATED: Add @Transactional for DB ops
     @Transactional
     public String refreshAccessToken(String refreshTokenValue, String userId) {
-        RefreshToken refreshToken = RefreshToken.findByToken(refreshTokenValue);
-        if (refreshToken == null || !refreshToken.isValid() || !refreshToken.userId.toString().equals(userId)) {
+        RefreshToken refreshToken = findByToken(refreshTokenValue);
+        if (refreshToken == null || !isValid(refreshToken) || !refreshToken.userId.toString().equals(userId)) {
             LOG.warn("Invalid refresh token attempt for userId: {}", userId);
             throw new RuntimeException("Invalid or expired refresh token");
         }
 
-//        RefreshToken.deleteByToken(refreshTokenValue); // DB delete
-//        RefreshToken newRefresh = RefreshToken.createForUser(Long.parseLong(userId)); // DB persist
+//        deleteByToken(refreshTokenValue); // Use new method
+//        RefreshToken newRefresh = createForUser(Long.parseLong(userId)); // Use new method
 
-//        LOG.info("Refresh attempt for userId: {}", userId);
-//        LOG.info("New Refresh token generated : {}", newRefresh.token);
         User user = User.findById(Long.parseLong(userId));
-
-
+        if (user == null) {
+            LOG.warn("User not found for userId: {}", userId);
+            throw new RuntimeException("User not found");
+        }
         String newAccessToken = generateToken(user.email, user.username, Roles.USER);
 
         LOG.info("Access token refreshed for userId: {}", userId);
         return newAccessToken;
     }
 
-    // Existing (unchanged)
     private String generateToken(String subject, String name, String... roles) {
         try {
             JwtClaims jwtClaims = new JwtClaims();
@@ -63,7 +61,7 @@ public class TokenService {
             jwtClaims.setClaim(Claims.preferred_username.name(), name);
             jwtClaims.setClaim(Claims.groups.name(), Arrays.asList(roles));
             jwtClaims.setAudience("using-jwt");
-            jwtClaims.setExpirationTimeMinutesInTheFuture(2);
+            jwtClaims.setExpirationTimeMinutesInTheFuture(2); // 2-min expiry
 
             String token = TokenUtils.generateTokenString(jwtClaims);
             LOG.info("Access token generated: {}", token);
@@ -72,6 +70,33 @@ public class TokenService {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+
+    @Transactional
+    public RefreshToken createForUser(Long userId) {
+        RefreshToken refresh = new RefreshToken();
+        refresh.token = UUID.randomUUID().toString();
+        refresh.userId = userId;
+        refresh.expiryDate = Instant.now().plusSeconds(604800); // 7 days
+        refresh.persist();
+        return refresh;
+    }
+
+
+    public boolean isValid(RefreshToken refreshToken) {
+        return refreshToken != null && Instant.now().isBefore(refreshToken.expiryDate);
+    }
+
+
+    public RefreshToken findByToken(String token) {
+        return RefreshToken.find("token", token).firstResult();
+    }
+
+
+    @Transactional
+    public void deleteByToken(String token) {
+        RefreshToken.delete("token", token);
     }
 
     public static class TokenPair {
@@ -83,5 +108,4 @@ public class TokenService {
             this.refreshToken = refreshToken;
         }
     }
-
 }

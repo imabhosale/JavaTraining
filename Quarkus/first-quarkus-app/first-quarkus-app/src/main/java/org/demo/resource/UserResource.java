@@ -23,7 +23,7 @@ import org.demo.exceptions.DuplicateUserException;
 @Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
     @Inject
-    TokenService service;
+    TokenService tokenService;
 
     @Inject
     UserRepository userRepository;
@@ -60,18 +60,18 @@ public class UserResource {
         if (existingUser == null || !BcryptUtil.matches(request.password, existingUser.password)) {
             throw new InvalidCredentialsException("No user found or password is incorrect");
         }
-        TokenService.TokenPair tokens = service.generateUserToken(existingUser.email, existingUser.username, existingUser.id);
+        TokenService.TokenPair tokens = tokenService.generateUserToken(existingUser.email, existingUser.username, existingUser.id);
         LOG.info("Login success: {}", existingUser.username);
         return Response.ok(new LoginResponse(tokens.accessToken, tokens.refreshToken)).build();
     }
 
-    // UPDATED: Accept JSON body
+
     @POST
     @Path("/refresh")
-    @Transactional // Ensure DB ops are safe
+    @Transactional
     public Response refresh(RefreshRequest request) {
         LOG.info("Refresh attempt for userId: {}", request.userId);
-        String newAccessToken = service.refreshAccessToken(request.refreshToken, request.userId);
+        String newAccessToken = tokenService.refreshAccessToken(request.refreshToken, request.userId);
         return Response.ok(new LoginResponse(newAccessToken, null)).build();
     }
 
@@ -80,7 +80,7 @@ public class UserResource {
     @Transactional
     public Response logout(@FormParam("refreshToken") String refreshToken) {
         LOG.info("Logout attempt with refreshToken: {}", refreshToken);
-        RefreshToken.deleteByToken(refreshToken);
+        tokenService.deleteByToken(refreshToken);
         return Response.ok("Logged out successfully").build();
     }
 
