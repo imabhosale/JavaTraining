@@ -8,6 +8,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.demo.dto.LoginRequest;
 import org.demo.dto.LoginResponse;
+import org.demo.dto.RefreshRequest;
+import org.demo.model.RefreshToken;
 import org.demo.model.User;  // Your User entity
 import org.demo.repository.UserRepository;
 import org.demo.security.TokenService;
@@ -33,16 +35,11 @@ public class UserResource {
     @Transactional
     public Response register(User user) {
         LOG.info("Register attempt: {}", user.username);
-
-        // Check duplicate
         if (User.find("username", user.username).firstResult() != null) {
-            throw new DuplicateUserException("User with login '" + user.username + "' already exists!");  // <-- NOW RESOLVES
+            throw new DuplicateUserException("User with username '" + user.username + "' already exists!");
         }
-
-        // Hash password
         user.password = BcryptUtil.bcryptHash(user.password);
         user.persist();
-
         LOG.info("Registered: {}", user.username);
         return Response.ok(user).build();
     }
@@ -57,19 +54,34 @@ public class UserResource {
     @POST
     @Path("/login")
     public Response login(LoginRequest request) {
-
         LOG.info("Login payload: username={}, password={}", request.username, request.password);
         LOG.info("Login attempt: {}", request.username);
-
         User existingUser = User.find("username", request.username).firstResult();
         if (existingUser == null || !BcryptUtil.matches(request.password, existingUser.password)) {
-            throw new InvalidCredentialsException("No user found or password is incorrect");          }
-
-        String token = service.generateUserToken(existingUser.email, existingUser.username);
+            throw new InvalidCredentialsException("No user found or password is incorrect");
+        }
+        TokenService.TokenPair tokens = service.generateUserToken(existingUser.email, existingUser.username, existingUser.id);
         LOG.info("Login success: {}", existingUser.username);
-
-        return Response.ok(new LoginResponse(token)).build();
+        return Response.ok(new LoginResponse(tokens.accessToken, tokens.refreshToken)).build();
     }
 
+    // UPDATED: Accept JSON body
+    @POST
+    @Path("/refresh")
+    @Transactional // Ensure DB ops are safe
+    public Response refresh(RefreshRequest request) {
+        LOG.info("Refresh attempt for userId: {}", request.userId);
+        String newAccessToken = service.refreshAccessToken(request.refreshToken, request.userId);
+        return Response.ok(new LoginResponse(newAccessToken, null)).build();
+    }
+
+    @POST
+    @Path("/logout")
+    @Transactional
+    public Response logout(@FormParam("refreshToken") String refreshToken) {
+        LOG.info("Logout attempt with refreshToken: {}", refreshToken);
+        RefreshToken.deleteByToken(refreshToken);
+        return Response.ok("Logged out successfully").build();
+    }
 
  }
