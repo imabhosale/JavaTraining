@@ -57,7 +57,7 @@ public class ProductResource {
 
     @DELETE
     @Path("/{id}")
-    @RolesAllowed({"Admin", "User"})
+//    @RolesAllowed({"Admin", "User"})
     public Response deleteProduct(@PathParam("id") Long id) {
         boolean deleted = productService.deleteProduct(id);
         if (!deleted) return Response.status(Response.Status.NOT_FOUND).build();

@@ -5,6 +5,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -15,10 +16,16 @@ import org.demo.security.Roles;
 @Path("/hello")
 public class GreetingResource {
 
-
-
     @Context
     SecurityContext securityContext;
+
+    @GET
+    @Path("/greeting/{name}")
+    public String greeting(@PathParam("name") String name) {
+        return "Hello " + name;
+    }
+
+
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)

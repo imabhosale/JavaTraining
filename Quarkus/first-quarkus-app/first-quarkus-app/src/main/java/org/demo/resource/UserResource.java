@@ -8,14 +8,14 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.demo.dto.LoginRequest;
 import org.demo.dto.LoginResponse;
+import org.demo.dto.LogoutRequest;
 import org.demo.dto.RefreshRequest;
-import org.demo.model.RefreshToken;
-import org.demo.model.User;  // Your User entity
+import org.demo.model.User;
 import org.demo.repository.UserRepository;
 import org.demo.security.TokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.demo.exceptions.InvalidCredentialsException;  // <-- ADD IMPORTS
+import org.demo.exceptions.InvalidCredentialsException;
 import org.demo.exceptions.DuplicateUserException;
 
 @Path("/users")
@@ -75,13 +75,13 @@ public class UserResource {
         return Response.ok(new LoginResponse(newAccessToken, null)).build();
     }
 
-    @POST
-    @Path("/logout")
-    @Transactional
-    public Response logout(@FormParam("refreshToken") String refreshToken) {
-        LOG.info("Logout attempt with refreshToken: {}", refreshToken);
-        tokenService.deleteByToken(refreshToken);
-        return Response.ok("Logged out successfully").build();
-    }
+//    @POST
+//    @Path("/logout")
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    public Response logout(LogoutRequest request) {
+//        String refreshToken = request.getRefreshToken();
+//        // handle logout logic
+//        return Response.ok("Logged out").build();
+//    }
 
  }

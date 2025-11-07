@@ -2,9 +2,9 @@ package org.demo.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.demo.model.Product;
-import org.demo.repository.ProductRepository;
 
 import java.util.List;
 
@@ -12,26 +12,33 @@ import java.util.List;
 public class ProductService {
 
     @Inject
-    ProductRepository productRepository;
+    EntityManager em;
 
     public List<Product> getAllProducts() {
-        return productRepository.listAll();
+        return em.createNamedQuery("Product.findAll", Product.class)
+                .getResultList();
     }
 
     public Product getProductById(Long id) {
-        return productRepository.findById(id);
+        return em.createNamedQuery("Product.findById", Product.class)
+                .setParameter("id", id)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
     }
 
     @Transactional
     public Product createProduct(Product product) {
-        productRepository.persist(product);
+        em.persist(product);        // persist stays the same
         return product;
     }
 
     @Transactional
     public Product updateProduct(Long id, Product updatedProduct) {
-        Product product = productRepository.findById(id);
-        if (product == null) return null;
+        Product product = getProductById(id);   // reuse the named query
+        if (product == null) {
+            return null;
+        }
 
         product.setName(updatedProduct.getName());
         product.setDescription(updatedProduct.getDescription());
@@ -43,6 +50,9 @@ public class ProductService {
 
     @Transactional
     public boolean deleteProduct(Long id) {
-        return productRepository.deleteById(id);
+        int deleted = em.createNamedQuery("Product.deleteById")
+                .setParameter("id", id)
+                .executeUpdate();
+        return deleted > 0;
     }
 }

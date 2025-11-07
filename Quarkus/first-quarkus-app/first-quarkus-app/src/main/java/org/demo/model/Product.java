@@ -1,10 +1,31 @@
 package org.demo.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.demo.util.EncryptDecryptConverter;
+
 import java.math.BigDecimal;
 
 @Entity
+
+@Getter
+@Setter
 @Table(name = "products")
+@NamedQueries({
+        @NamedQuery(
+                name = "Product.findAll",
+                query = "SELECT p FROM Product p"
+        ),
+        @NamedQuery(
+                name = "Product.findById",
+                query = "SELECT p FROM Product p WHERE p.id = :id"
+        ),
+        @NamedQuery(
+                name = "Product.deleteById",
+                query = "DELETE FROM Product p WHERE p.id = :id"
+        )
+})
 public class Product {
 
     @Id
@@ -14,6 +35,8 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    @Convert(converter = EncryptDecryptConverter.class)
     private String description;
 
     @Column(nullable = false)
@@ -30,20 +53,4 @@ public class Product {
         this.price = price;
         this.quantity = quantity;
     }
-
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
-
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
 }

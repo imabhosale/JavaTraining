@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: user_management
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  quarkus-app:
+    build: .
+    container_name: quarkus-app
+    ports:
+      - "7517:7517"
+    depends_on:
+      - postgres
+    environment:
+      QUARKUS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_management
+      QUARKUS_DATASOURCE_USERNAME: postgres
+      QUARKUS_DATASOURCE_PASSWORD: root
+    restart: always
+
+volumes:
+  pgdata:

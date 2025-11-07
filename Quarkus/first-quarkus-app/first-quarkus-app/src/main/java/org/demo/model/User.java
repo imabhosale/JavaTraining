@@ -23,6 +23,7 @@ public class User extends PanacheEntity {
 
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters long")
+    @Password
     public String password;
 
     @NotBlank(message = "Email is required")

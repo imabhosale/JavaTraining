@@ -24,7 +24,7 @@ public class TokenService {
     @Transactional
     public TokenPair generateUserToken(String email, String username, Long userId) {
         String accessToken = generateToken(email, username, Roles.USER);
-        RefreshToken refresh = createForUser(userId); // Use new method
+        RefreshToken refresh = createForUser(userId);
         LOG.info("Tokens generated for user: {}", username);
         return new TokenPair(accessToken, refresh.token);
     }
@@ -61,7 +61,7 @@ public class TokenService {
             jwtClaims.setClaim(Claims.preferred_username.name(), name);
             jwtClaims.setClaim(Claims.groups.name(), Arrays.asList(roles));
             jwtClaims.setAudience("using-jwt");
-            jwtClaims.setExpirationTimeMinutesInTheFuture(2); // 2-min expiry
+            jwtClaims.setExpirationTimeMinutesInTheFuture(2 * 60 * 60); // 2-hr expiry
 
             String token = TokenUtils.generateTokenString(jwtClaims);
             LOG.info("Access token generated: {}", token);
