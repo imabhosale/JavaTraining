@@ -25,14 +25,15 @@ public class ProductResource {
     ProductService productService;
 
     @GET
-    @RolesAllowed({"Admin", "User"})
+    @RolesAllowed("User")
     public List<Product> getAllProducts() {
         return productService.getAllProducts();
     }
 
     @GET
     @Path("/{id}")
-    @Authenticated
+//    @Authenticated
+    @RolesAllowed("User")
     public Response getProductById(@PathParam("id") Long id) {
         Product product = productService.getProductById(id);
         if (product == null) return Response.status(Response.Status.NOT_FOUND).build();
@@ -40,15 +41,17 @@ public class ProductResource {
     }
 
     @POST
-    @RolesAllowed({"Admin","User"})
+//    @RolesAllowed({"Admin","User"})
+    @RolesAllowed("Admin")
     public Response createProduct(Product product) {
         Product created = productService.createProduct(product);
         return Response.status(Response.Status.CREATED).entity(created).build();
     }
 
     @PUT
-    @RolesAllowed({"Admin", "User"})
+//    @RolesAllowed({"Admin", "User"})
     @Path("/{id}")
+    @RolesAllowed("Admin")
     public Response updateProduct(@PathParam("id") Long id, Product product) {
         Product updated = productService.updateProduct(id, product);
         if (updated == null) return Response.status(Response.Status.NOT_FOUND).build();
@@ -57,6 +60,7 @@ public class ProductResource {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed("Admin")
 //    @RolesAllowed({"Admin", "User"})
     public Response deleteProduct(@PathParam("id") Long id) {
         boolean deleted = productService.deleteProduct(id);

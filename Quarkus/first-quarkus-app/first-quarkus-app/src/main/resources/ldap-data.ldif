@@ -1,0 +1,42 @@
+# src/main/resources/ldap-data.ldif
+dn: dc=quarkus,dc=io
+objectClass: domain
+dc: quarkus
+
+dn: ou=users,dc=quarkus,dc=io
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=quarkus,dc=io
+objectClass: organizationalUnit
+ou: groups
+
+# Users
+dn: uid=admin,ou=users,dc=quarkus,dc=io
+objectClass: inetOrgPerson
+uid: admin
+cn: Admin User
+sn: User
+userPassword: admin123
+memberOf: cn=Admin,ou=groups,dc=quarkus,dc=io
+memberOf: cn=User,ou=groups,dc=quarkus,dc=io
+
+dn: uid=user,ou=users,dc=quarkus,dc=io
+objectClass: inetOrgPerson
+uid: user
+cn: Regular User
+sn: User
+userPassword: user123
+memberOf: cn=User,ou=groups,dc=quarkus,dc=io
+
+# Groups
+dn: cn=Admin,ou=groups,dc=quarkus,dc=io
+objectClass: groupOfNames
+cn: Admin
+member: uid=admin,ou=users,dc=quarkus,dc=io
+
+dn: cn=User,ou=groups,dc=quarkus,dc=io
+objectClass: groupOfNames
+cn: User
+member: uid=admin,ou=users,dc=quarkus,dc=io
+member: uid=user,ou=users,dc=quarkus,dc=io
